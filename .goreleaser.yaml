@@ -1,0 +1,39 @@
+version: 2
+
+project_name: cli-login
+
+builds:
+  - id: cli-login
+    main: ./cmd/cli-login
+    binary: cli-login
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - INTERVIEW_GUIDE.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  disable: true

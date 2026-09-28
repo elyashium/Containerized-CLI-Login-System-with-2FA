@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/shash/cli-login/internal/models"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/models"
 )
 
 const sessionColumns = `

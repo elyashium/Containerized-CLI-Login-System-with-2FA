@@ -9,8 +9,8 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 
-	"github.com/shash/cli-login/internal/config"
-	"github.com/shash/cli-login/internal/models"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/config"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/models"
 )
 
 // newTestService builds a Service with no store. Every test here exercises

@@ -1,4 +1,4 @@
-module github.com/shash/cli-login
+module github.com/elyashium/Containerized-CLI-Login-System-with-2FA
 
 go 1.23
 
@@ -17,6 +17,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/term v0.25.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	rsc.io/qr v0.2.0 // indirect
 )

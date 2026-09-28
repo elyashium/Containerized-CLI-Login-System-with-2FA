@@ -12,7 +12,7 @@ import (
 
 	"github.com/mdp/qrterminal/v3"
 
-	"github.com/shash/cli-login/internal/auth"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/auth"
 )
 
 // command is one shell command.

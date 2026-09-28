@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/shash/cli-login/internal/models"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/models"
 )
 
 // Sentinel errors returned to callers. Callers match on these with errors.Is

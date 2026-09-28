@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shash/cli-login/internal/auth"
-	"github.com/shash/cli-login/internal/config"
-	"github.com/shash/cli-login/internal/models"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/auth"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/config"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/models"
 )
 
 // errExit unwinds the REPL when the user asks to quit.

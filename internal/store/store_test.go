@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shash/cli-login/internal/migrations"
-	"github.com/shash/cli-login/internal/models"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/migrations"
+	"github.com/elyashium/Containerized-CLI-Login-System-with-2FA/internal/models"
 )
 
 // These tests need a real PostgreSQL instance, because the behaviour under test
