@@ -1,0 +1,32 @@
+# Keep the build context small and never ship secrets or local state.
+
+.git
+.gitignore
+.github
+
+# Secrets and local state
+.env
+.env.*
+!.env.example
+.state/
+.cli-login/
+
+# Build artefacts
+bin/
+dist/
+*.exe
+*.test
+coverage.*
+
+# Docs and tooling that the binary does not need
+README.md
+Makefile
+docker-compose.yml
+docs/
+*.md
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,125 @@
+# docker-compose.yml — Postgres plus the CLI, both containerized.
+#
+# Normal use:
+#   docker compose up -d db                 start the database
+#   docker compose run --rm cli             open the interactive login shell
+#
+# The CLI is an interactive TTY program, so it is not started by
+# `docker compose up`; `run` attaches your terminal to it properly.
+
+name: cli-login
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-clilogin}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_dotenv}
+      # Explicit initdb args: scram-sha-256 rather than the older md5.
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      # Named volume: this is what makes the data survive `docker compose down`
+      # and container replacement.
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      # The CLI waits for this before connecting, so a first run never races
+      # the database's own initialisation.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-clilogin}"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+    # No published port by default: the database is only reachable from the
+    # compose network, so nothing is exposed to the host. Uncomment to inspect
+    # it with a local psql.
+    # ports:
+    #   - "127.0.0.1:5432:5432"
+
+  cli:
+    build:
+      context: .
+      args:
+        VERSION: ${VERSION:-1.0.0}
+    image: cli-login:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # sslmode=disable is acceptable here because the connection never leaves
+      # the private compose network. Point DATABASE_URL at a TLS-enabled server
+      # with sslmode=verify-full for any real deployment.
+      DATABASE_URL: >-
+        postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-change_me_in_dotenv}@db:5432/${POSTGRES_DB:-clilogin}?sslmode=disable
+
+      # Required. Generate with `make genkey` (or `docker compose run --rm cli genkey`)
+      # and put it in .env. Losing it makes existing TOTP secrets undecryptable.
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-}
+
+      # Security and session policy — all configurable, all documented in
+      # .env.example.
+      BCRYPT_COST: ${BCRYPT_COST:-12}
+      MAX_FAILED_ATTEMPTS: ${MAX_FAILED_ATTEMPTS:-5}
+      LOCKOUT_DURATION: ${LOCKOUT_DURATION:-15m}
+      SESSION_IDLE_TIMEOUT: ${SESSION_IDLE_TIMEOUT:-15m}
+      SESSION_ABSOLUTE_TIMEOUT: ${SESSION_ABSOLUTE_TIMEOUT:-12h}
+      PENDING_LOGIN_TTL: ${PENDING_LOGIN_TTL:-2m}
+      MIN_PASSWORD_LENGTH: ${MIN_PASSWORD_LENGTH:-10}
+      TOTP_ISSUER: ${TOTP_ISSUER:-CLI Login}
+      TOTP_SKEW: ${TOTP_SKEW:-1}
+      SESSION_PERSIST: ${SESSION_PERSIST:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      # Timestamps in the user-details block are rendered in this zone.
+      TZ: ${TZ:-UTC}
+    volumes:
+      # Keeps the session token cache and shell history across container
+      # replacement, so a session really does survive a restart until it times
+      # out on the server side.
+      - cli-state:/home/app/.cli-login
+    stdin_open: true
+    tty: true
+    # Excluded from `docker compose up`: an interactive shell with nobody
+    # attached is not useful. `docker compose run` enables the profile itself.
+    profiles: ["cli"]
+
+  # One-shot migration runner, for CI or for inspecting the schema without
+  # opening the shell. The CLI also migrates on startup, so this is optional.
+  migrate:
+    image: cli-login:latest
+    build:
+      context: .
+    command: ["migrate"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: >-
+        postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-change_me_in_dotenv}@db:5432/${POSTGRES_DB:-clilogin}?sslmode=disable
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-}
+      LOG_LEVEL: info
+    profiles: ["tools"]
+
+  # Full test run, including the store tests that need a live database. It
+  # reuses the Dockerfile's build stage (which already has the Go toolchain and
+  # the sources) and joins the compose network, so the database still needs no
+  # published port and no local Go install is required.
+  #
+  #   docker compose run --rm tests        (or: make test-integration)
+  tests:
+    build:
+      context: .
+      target: build
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Setting this is what un-skips internal/store's integration tests.
+      TEST_DATABASE_URL: >-
+        postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-change_me_in_dotenv}@db:5432/${POSTGRES_DB:-clilogin}?sslmode=disable
+    command: ["go", "test", "./...", "-count=1", "-v"]
+    profiles: ["tools"]
+
+volumes:
+  db-data:
+  cli-state:
