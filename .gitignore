@@ -3,6 +3,7 @@
 /dist/
 /cli-login
 /cli-login.exe
+/INTERVIEW_GUIDE.md
 
 # Local environment — never commit real secrets
 .env

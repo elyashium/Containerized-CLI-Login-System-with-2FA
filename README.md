@@ -57,7 +57,7 @@ go build ./cmd/cli-login
 go test ./...
 ```
 
-For configuration options and the design/security rationale, see [`.env.example`](.env.example) and [`INTERVIEW_GUIDE.md`](INTERVIEW_GUIDE.md).
+For configuration options, see [`.env.example`](.env.example).
 
 ## Repository
 
