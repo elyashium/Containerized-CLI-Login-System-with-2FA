@@ -1,8 +1,8 @@
 # Build output
 /bin/
 /dist/
-cli-login
-cli-login.exe
+/cli-login
+/cli-login.exe
 
 # Local environment — never commit real secrets
 .env
